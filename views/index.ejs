@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title><%= title %></title>
+    <style>
+        .card-message{
+            border: 2px solid #76BA99;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 80%;
+        }
+    </style>
+</head>
+<body class="bg-[#76BA99] flex justify-center items-center min-h-screen">
+    <div class="bg-white py-5 px-4 rounded-lg w-[95vw] sm:w-max">
+        <h1 class="font-semibold text-2xl mb-2">Random Global Chat</h1>
+        <p class="font-medium mb-5">Online : <span id="user-online"></span></p>
+
+        <div class="mb-5 max-h-[400px] overflow-y-auto" id="list-chat" >
+        </div>
+
+        <form id="form-message" >
+        <div class="flex">
+                <input type="text" name="message" id="input-message" class="border py-2 px-3 rounded-lg w-[200px] sm:w-[300px] mr-4" placeholder="input message">
+                <button class="py-2 px-8 rounded-lg bg-[#76BA99] text-white font-medium">send</button>
+        </div>
+        </form>
+    </div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io()
+    const formMessage = document.getElementById('form-message')
+    const listChat = document.getElementById('list-chat')
+    const inputMessage = document.getElementById('input-message')
+    const userOnline = document.getElementById('user-online')
+
+    formMessage.addEventListener('submit', (e) => {
+        e.preventDefault()
+
+        if (inputMessage.value) {
+            socket.emit("message", inputMessage.value)
+            const cardMessage = document.createElement('div')
+            cardMessage.style.textAlign = 'right'
+            cardMessage.style.marginLeft = '20%'
+            cardMessage.textContent = inputMessage.value
+            cardMessage.classList.add('card-message')
+    
+            listChat.append(cardMessage)
+    
+            inputMessage.value = ''
+        }
+    })
+
+    socket.on("message" , (data) => {
+        const cardMessage = document.createElement('div')
+            cardMessage.textContent = data
+            cardMessage.classList.add('card-message')
+    
+        listChat.append(cardMessage)
+    })
+
+    socket.emit('join')
+    socket.on("countUserOnline", (data) => {
+        userOnline.textContent = data
+    })
+</script>
+</body>
+</html>
